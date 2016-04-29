@@ -1,0 +1,12 @@
+{
+    "version": "0.1.0",
+    "command": "d:/Python27/python.exe",
+    "args": ["${file}"]
+    // "problemMatcher": {
+    //     "fileLocation": ["relative", "${workspaceRoot}"],
+    //     "pattern": {
+    //         "regexp": "^(.*)+s$",
+    //         "message": 1
+    //     }
+    // }
+}

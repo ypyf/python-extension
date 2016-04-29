@@ -26,3 +26,9 @@
 *.exe
 *.out
 *.app
+
+# Intellij
+.idea/*
+
+# VS Code
+/.vscode/.browse.VC.db
