@@ -4,7 +4,7 @@ project(simple)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 set(SOURCE_FILE main.cpp)
-add_executable(simple ${SOURCE_FILES})
+add_executable(simple ${SOURCE_FILE})
 
 set(PYTHON_INCLUDE_DIR D:/Python27/include)
 set(PYTHON_LIBRARY D:/Python27/libs)
