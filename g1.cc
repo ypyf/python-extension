@@ -8,7 +8,7 @@
 #include <string.h>
 
 namespace cipher {
-    typedef unsigned char u8;
+    typedef unsigned char u8_t;
 
     static void handleErrors(void)
     {
@@ -19,7 +19,7 @@ namespace cipher {
         // PyObject_Print(Py_BuildValue("s", err_str), stdout, 0);
     }
 
-    static int encrypt(u8 *plaintext, int plaintext_len, u8 *key, u8 *iv, u8 *ciphertext)
+    static int encrypt(u8_t *plaintext, int plaintext_len, u8_t *key, u8_t *iv, u8_t *ciphertext)
     {
         EVP_CIPHER_CTX *ctx;
 
@@ -57,7 +57,7 @@ namespace cipher {
         return ciphertext_len;
     }
 
-    static int decrypt(u8 *ciphertext, int ciphertext_len, u8 *key, u8 *iv, u8 *plaintext)
+    static int decrypt(u8_t *ciphertext, int ciphertext_len, u8_t *key, u8_t *iv, u8_t *plaintext)
     {
         EVP_CIPHER_CTX *ctx;
 
@@ -103,22 +103,22 @@ namespace cipher {
         */
 
         /* A 256 bit key */
-        u8 *key = (u8 *) "01234567890123456789012345678901";
+        u8_t *key = (u8_t *) "01234567890123456789012345678901";
 
         /* A 128 bit IV */
-        u8 *iv = (u8 *) "01234567890123456";
+        u8_t *iv = (u8_t *) "01234567890123456";
 
         /* Message to be encrypted */
-        u8 *plaintext = (u8 *) "The quick brown fox jumps over the lazy dogs";
+        u8_t *plaintext = (u8_t *) "The quick brown fox jumps over the lazy dogs";
 
         /* Buffer for ciphertext. Ensure the buffer is long enough for the
         * ciphertext which may be longer than the plaintext, dependant on the
         * algorithm and mode
         */
-        u8 ciphertext[128];
+        u8_t ciphertext[128];
 
         /* Buffer for the decrypted text */
-        u8 decryptedtext[128];
+        u8_t decryptedtext[128];
 
         int decryptedtext_len, ciphertext_len;
 
