@@ -8,6 +8,7 @@
 #include <string.h>
 
 namespace cipher {
+    typedef unsigned char u8;
 
     static void handleErrors(void)
     {
@@ -18,7 +19,7 @@ namespace cipher {
         // PyObject_Print(Py_BuildValue("s", err_str), stdout, 0);
     }
 
-    static int encrypt(unsigned char *plaintext, int plaintext_len, unsigned char *key, unsigned char *iv, unsigned char *ciphertext)
+    static int encrypt(u8 *plaintext, int plaintext_len, u8 *key, u8 *iv, u8 *ciphertext)
     {
         EVP_CIPHER_CTX *ctx;
 
@@ -34,7 +35,7 @@ namespace cipher {
         * In this example we are using 256 bit AES (i.e. a 256 bit key). The
         * IV size for *most* modes is the same as the block size. For AES this
         * is 128 bits */
-        if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+        if(1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL))
             handleErrors();
 
         /* Provide the message to be encrypted, and obtain the encrypted output.
@@ -56,7 +57,7 @@ namespace cipher {
         return ciphertext_len;
     }
 
-    static int decrypt(unsigned char *ciphertext, int ciphertext_len, unsigned char *key, unsigned char *iv, unsigned char *plaintext)
+    static int decrypt(u8 *ciphertext, int ciphertext_len, u8 *key, u8 *iv, u8 *plaintext)
     {
         EVP_CIPHER_CTX *ctx;
 
@@ -72,7 +73,7 @@ namespace cipher {
         * In this example we are using 256 bit AES (i.e. a 256 bit key). The
         * IV size for *most* modes is the same as the block size. For AES this
         * is 128 bits */
-        if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, key, iv))
+        if(1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_ecb(), NULL, key, NULL))
             handleErrors();
 
         /* Provide the message to be decrypted, and obtain the plaintext output.
@@ -102,22 +103,22 @@ namespace cipher {
         */
 
         /* A 256 bit key */
-        unsigned char *key = (unsigned char *) "01234567890123456789012345678901";
+        u8 *key = (u8 *) "01234567890123456789012345678901";
 
         /* A 128 bit IV */
-        unsigned char *iv = (unsigned char *) "01234567890123456";
+        u8 *iv = (u8 *) "01234567890123456";
 
         /* Message to be encrypted */
-        unsigned char *plaintext = (unsigned char *) "The quick brown fox jumps over the lazy dogs";
+        u8 *plaintext = (u8 *) "The quick brown fox jumps over the lazy dogs";
 
         /* Buffer for ciphertext. Ensure the buffer is long enough for the
         * ciphertext which may be longer than the plaintext, dependant on the
         * algorithm and mode
         */
-        unsigned char ciphertext[128];
+        u8 ciphertext[128];
 
         /* Buffer for the decrypted text */
-        unsigned char decryptedtext[128];
+        u8 decryptedtext[128];
 
         int decryptedtext_len, ciphertext_len;
 
