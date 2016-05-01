@@ -32,3 +32,6 @@
 
 # VS Code
 /.vscode/.browse.VC.db
+
+# python build files
+build/*

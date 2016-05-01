@@ -1,0 +1,20 @@
+{
+    "configurations": [
+        {
+            "name": "Mac",
+            "includePath": ["/usr/include"]
+        },
+        {
+            "name": "Linux",
+            "includePath": ["/usr/include"]
+        },
+        {
+            "name": "Win32",
+            "includePath": ["d:/Program Files (x86)/Microsoft Visual Studio 14.0/VC/include",
+                            "c:/Program Files (x86)/Microsoft SDKs/Windows/v7.1A/Include",
+                            "c:/Program Files (x86)/Windows Kits/10/Include/10.0.10240.0/ucrt",
+                            "d:/OpenSSL-Win32/include",
+                            "d:/Python27/include"]
+        }
+    ]
+}
