@@ -1,14 +1,20 @@
-#include <Python.h>
+#include <string.h>
+#include <assert.h>
 #include <windows.h>
+#include <Python.h>
+
+#define ZLIB_CONST
+#include <zlib.h>
 
 #include <openssl/conf.h>
 #include <openssl/evp.h>
 #include <openssl/err.h>
 //#include <openssl/applink.c>
-#include <string.h>
+
+#include "typedefs.h"
+
 
 namespace cipher {
-    typedef unsigned char u8_t;
 
     static void handleErrors(void)
     {
@@ -19,7 +25,7 @@ namespace cipher {
         // PyObject_Print(Py_BuildValue("s", err_str), stdout, 0);
     }
 
-    static int encrypt(u8_t *plaintext, int plaintext_len, u8_t *key, u8_t *iv, u8_t *ciphertext)
+    static int encrypt(byte *plaintext, int plaintext_len, byte *key, byte *iv, byte *ciphertext)
     {
         EVP_CIPHER_CTX *ctx;
 
@@ -57,7 +63,7 @@ namespace cipher {
         return ciphertext_len;
     }
 
-    static int decrypt(u8_t *ciphertext, int ciphertext_len, u8_t *key, u8_t *iv, u8_t *plaintext)
+    static int decrypt(byte *ciphertext, int ciphertext_len, byte *key, byte *iv, byte *plaintext)
     {
         EVP_CIPHER_CTX *ctx;
 
@@ -103,22 +109,22 @@ namespace cipher {
         */
 
         /* A 256 bit key */
-        u8_t *key = (u8_t *) "01234567890123456789012345678901";
+        byte *key = (byte *) "01234567890123456789012345678901";
 
         /* A 128 bit IV */
-        u8_t *iv = (u8_t *) "01234567890123456";
+        byte *iv = (byte *) "01234567890123456";
 
         /* Message to be encrypted */
-        u8_t *plaintext = (u8_t *) "The quick brown fox jumps over the lazy dogs";
+        byte *plaintext = (byte *) "The quick brown fox jumps over the lazy dogs";
 
         /* Buffer for ciphertext. Ensure the buffer is long enough for the
         * ciphertext which may be longer than the plaintext, dependant on the
         * algorithm and mode
         */
-        u8_t ciphertext[128];
+        byte ciphertext[128];
 
         /* Buffer for the decrypted text */
-        u8_t decryptedtext[128];
+        byte decryptedtext[128];
 
         int decryptedtext_len, ciphertext_len;
 
@@ -152,6 +158,88 @@ namespace cipher {
         ERR_free_strings();
 
         Py_RETURN_NONE;
+    }
+}
+
+namespace zlib {
+    int compress(const byte* src, int* out_buf_size, byte* dest, int in_buf_size) {
+        /* allocate deflate state */
+        z_stream strm;
+        strm.next_in = Z_NULL;
+        strm.zalloc = Z_NULL;
+        strm.zfree = Z_NULL;
+        strm.opaque = Z_NULL;
+
+        // 负的windowBits表示生成raw deflate
+        int ret = deflateInit2(&strm, Z_BEST_COMPRESSION, Z_DEFLATED, -15, 8, Z_DEFAULT_STRATEGY);
+        if (ret != Z_OK)
+            return ret;
+
+        // 设置输入参数
+        strm.avail_in = in_buf_size;
+        strm.next_in = src;
+
+        // 设置输出参数
+        strm.avail_out = in_buf_size;
+        strm.next_out = dest;
+
+        // 开始压缩
+        ret = deflate(&strm, Z_FINISH);
+        // 没有错误发生
+        assert(ret != Z_STREAM_ERROR);
+       // 所有数据处理完毕
+        assert(strm.avail_out > 0);
+        // 计算压缩后数据的大小
+        *out_buf_size = in_buf_size - strm.avail_out;
+
+        // 释放zlib资源
+        (void)deflateEnd(&strm);
+        return Z_OK;
+    }
+
+    int decompress(const byte* src, int* out_buf_size, byte* dest, int in_buf_size) {
+        /* allocate deflate state */
+        z_stream strm;
+        strm.next_in = Z_NULL;
+        strm.zalloc = Z_NULL;
+        strm.zfree = Z_NULL;
+        strm.opaque = Z_NULL;
+
+        // 负的windowBits表示raw deflate
+        int ret = inflateInit2(&strm, -15);
+        if (ret != Z_OK)
+            return ret;
+
+        // 设置输入参数
+        strm.avail_in = in_buf_size;
+        strm.next_in = src;
+
+        // 设置输出参数
+        strm.avail_out = in_buf_size;
+        strm.next_out = dest;
+
+        // 开始压缩
+        ret = deflate(&strm, Z_FINISH);
+        // 没有错误发生
+        assert(ret != Z_STREAM_ERROR);
+        // 所有数据处理完毕
+        assert(strm.avail_out > 0);
+        // 计算解压后数据的大小
+        *out_buf_size = in_buf_size - strm.avail_out;
+
+        // 释放zlib资源
+        (void)inflateEnd(&strm);
+        return Z_OK;
+    }
+
+    PyObject* test_zlib()
+    {
+        const byte input[] = "abcdefg";
+        byte output[1024];
+        int out_buf_size = 0;
+        compress(input, &out_buf_size, output, sizeof input);
+        output[out_buf_size] = '\0';
+        return Py_BuildValue("s", output);
     }
 }
 
@@ -235,13 +323,19 @@ namespace g1 {
             "win32_version",
             (PyCFunction) win32_version,
             METH_NOARGS,
-            "win32_version(): return Windows version information"
+            "win32_version(): return Windows version information",
         },
         {
             "aes_test",
             (PyCFunction) cipher::aes_test,
             METH_NOARGS,
-            "aes_test(): aes test"
+            "aes_test(): aes test",
+        },
+        {
+            "test_zlib",
+            (PyCFunction) zlib::test_zlib,
+            METH_NOARGS,
+            "test_zlib(): test zlib",
         },
         {NULL}
     };
